@@ -14,5 +14,11 @@
         <attr name = "backgroundColor" format="color"/>
     </declare-styleable>
 
+    <declare-styleable name="BooHeeRulerLayout">
+        <attr name="midLineColor" format="color"/>
+        <attr name="midLineHeight" format="dimension"/>
+        <attr name="midLineWidth" format="dimension"/>
+    </declare-styleable>
+
 
 </resources>
