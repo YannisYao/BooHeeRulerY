@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BooHeeRulerView">
+        <attr name = "minUnitWid" format="dimension"/>
+        <attr name = "maxUnitWid" format="dimension"/>
+        <attr name = "unitNums" format="integer"/>
+        <attr name = "minUnitColor" format="color"/>
+        <attr name = "datumLineColor" format="color"/>
+        <attr name = "maxUnitColor" format="color"/>
+        <attr name = "startNum" format="float"/>
+        <attr name = "unitTotal" format="integer"/>
+        <attr name = "unitValue" format="float"/>
+        <attr name = "unitSpacing" format="float"/>
+        <attr name = "backgroundColor" format="color"/>
+    </declare-styleable>
+
+
+</resources>
