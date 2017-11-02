@@ -1,9 +1,11 @@
 package com.share.yannis.booheeruler;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.RelativeLayout;
 
 /**
@@ -15,9 +17,6 @@ public class BooHeeRulerLayout extends RelativeLayout {
     private int midLineColor = 0xFF72BC49;
     private float midLineHeight = 140f;
     private float midLineWidth = 7f;
-    private int layoutWidth = LayoutParams.WRAP_CONTENT;
-    private int layoutHeight = LayoutParams.WRAP_CONTENT;
-
 
     public BooHeeRulerLayout(Context context) {
         super(context);
@@ -43,23 +42,16 @@ public class BooHeeRulerLayout extends RelativeLayout {
         midLineHeight = a.getDimension(R.styleable.BooHeeRulerLayout_midLineHeight,140f);
         midLineWidth = a.getDimension(R.styleable.BooHeeRulerLayout_midLineWidth,7f);
         a.recycle();
-        TypedArray  b = context.obtainStyledAttributes(attrs,com.android.internal.R.styleable.ViewGroup);
-        layoutWidth = b.getLayoutDimension(com.android.internal.R.styleable.ViewGroup_Layout_layout_width,"layout_width");
-        layoutHeight = b.getLayoutDimension(com.android.internal.R.styleable.ViewGroup_Layout_layout_height,"layout_height");
-        b.recycle();
     }
 
     private void initView(Context context) {
-        rulerView = (BooHeeRulerView) this.inflate(context,R.layout.booheeruler_view,this);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(layoutWidth,layoutHeight);
-        params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-        params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        this.addView(rulerView,params);
+        rulerView = (BooHeeRulerView) ((Activity) context).getLayoutInflater().inflate(R.layout.booheeruler_view,null);
+        setGravity(RelativeLayout.ALIGN_PARENT_TOP|RelativeLayout.CENTER_HORIZONTAL);
+        addView(rulerView);
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-
     }
 }

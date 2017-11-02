@@ -16,14 +16,9 @@
         android:layout_centerInParent="true"
         android:text="80kg"/>
 
-    <com.share.yannis.booheeruler.BooHeeRulerView
-        android:layout_width="wrap_content"
+    <com.share.yannis.booheeruler.BooHeeRulerLayout
+        android:layout_width="match_parent"
         android:layout_height="100dp"
-        app:unitNums="10"
-        app:unitSpacing="30"
-        app:unitTotal="600"
-        app:unitValue="0.1"
-        app:startNum="40"
         android:layout_below="@+id/content"
         />
 </RelativeLayout>
