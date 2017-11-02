@@ -5,7 +5,6 @@
         <attr name = "maxUnitWid" format="dimension"/>
         <attr name = "unitNums" format="integer"/>
         <attr name = "minUnitColor" format="color"/>
-        <attr name = "datumLineColor" format="color"/>
         <attr name = "maxUnitColor" format="color"/>
         <attr name = "startNum" format="float"/>
         <attr name = "unitTotal" format="integer"/>

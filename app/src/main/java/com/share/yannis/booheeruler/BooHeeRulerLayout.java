@@ -4,19 +4,24 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RelativeLayout;
 
 /**
  * Created by Yannis on 2017/10/30.
+ * 尺子UI包裹Layout
  */
 
 public class BooHeeRulerLayout extends RelativeLayout {
     private BooHeeRulerView rulerView;
+    //中线颜色
     private int midLineColor = 0xFF72BC49;
-    private float midLineHeight = 140f;
-    private float midLineWidth = 7f;
+    //中线高度
+    private float midLineHeight = 150f;
+    //中线宽度
+    private float midLineWidth = 10f;
 
     public BooHeeRulerLayout(Context context) {
         super(context);
@@ -39,8 +44,8 @@ public class BooHeeRulerLayout extends RelativeLayout {
     private void initAttr(Context context, AttributeSet attrs) {
         TypedArray  a = context.obtainStyledAttributes(attrs,R.styleable.BooHeeRulerLayout);
         midLineColor = a.getColor(R.styleable.BooHeeRulerLayout_midLineColor,0xFF72BC49);
-        midLineHeight = a.getDimension(R.styleable.BooHeeRulerLayout_midLineHeight,140f);
-        midLineWidth = a.getDimension(R.styleable.BooHeeRulerLayout_midLineWidth,7f);
+        midLineHeight = a.getDimension(R.styleable.BooHeeRulerLayout_midLineHeight,150f);
+        midLineWidth = a.getDimension(R.styleable.BooHeeRulerLayout_midLineWidth,10f);
         a.recycle();
     }
 
@@ -53,5 +58,19 @@ public class BooHeeRulerLayout extends RelativeLayout {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
+        drawMidLine(canvas);
+    }
+
+    /**
+     * 画中线
+     * @param canvas
+     */
+    private void drawMidLine(Canvas canvas) {
+        Paint midLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        midLinePaint.setColor(midLineColor);
+        midLinePaint.setStrokeWidth(midLineWidth);
+        midLinePaint.setStrokeCap(Paint.Cap.ROUND);
+        float startX = getWidth()/2;
+        canvas.drawLine(startX,0,startX,midLineHeight,midLinePaint);
     }
 }
