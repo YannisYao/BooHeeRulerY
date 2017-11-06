@@ -140,19 +140,17 @@ public class BooHeeRulerView extends View {
         int lenth = unitTotal + 1;
         float xOffset = PADDING_LEFT;
         float centerY = UNIT_HEIGHT;
-        canvas.drawLine(xOffset,centerY-UNIT_HEIGHT,xOffset+ lenth * unitSpacing + lenth * minUnitWid,centerY-UNIT_HEIGHT,topLinePaint);
+        canvas.drawLine(xOffset,centerY-UNIT_HEIGHT,xOffset+ unitTotal * unitSpacing + maxUnitWid,centerY-UNIT_HEIGHT,topLinePaint);
         for(int i = 0 ; i < lenth ; i ++){
             int count = i/unitNums;
+            float startX = xOffset+ i * unitSpacing;
+            float endX = startX;
             if(i % unitNums == 0){
-                float startX = xOffset+ i * unitSpacing + (i- count) * minUnitWid + (count) * maxUnitWid;
-                float endX = startX;
                 unitPaint.setColor(maxUnitColor);
                 unitPaint.setStrokeWidth(maxUnitWid);
                 canvas.drawLine(startX,centerY-UNIT_HEIGHT,endX,centerY+UNIT_HEIGHT,unitPaint);
                 if(count > 0) drawUnitText(startX,canvas,count);//绘制刻度文字
             }else{
-                float startX = xOffset+ i * unitSpacing + (i- count - 1) * minUnitWid + (count + 1) * maxUnitWid;
-                float endX = startX;
                 unitPaint.setColor(minUnitColor);
                 unitPaint.setStrokeWidth(minUnitWid);
                 canvas.drawLine(startX,centerY-UNIT_HEIGHT,endX,centerY,unitPaint);
@@ -185,8 +183,8 @@ public class BooHeeRulerView extends View {
                 lastestX = startX;
                 break;
             case MotionEvent.ACTION_MOVE:
-                float evenX = startX - lastestX;
-                scrollBy(-((int) evenX),0);//处理尺子滑动（此处注意scroll是反向移动的，与正常坐标系理解不同）
+                float deltaX = lastestX - startX;
+                scrollBy(((int) deltaX),0);//处理尺子滑动（此处注意scroll是反向移动的，与正常坐标系理解不同）
                 lastestX = startX;
                 break;
             case MotionEvent.ACTION_UP:
@@ -212,12 +210,10 @@ public class BooHeeRulerView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         //计算尺子的边界
-        int count = unitTotal/ unitNums;
-        int maxUnitCount = unitTotal % unitNums == 0 ? count + 1 : count ;
-        int minUnitCount = unitTotal + 1 - maxUnitCount;
-        totalUnitLength = maxUnitCount * maxUnitWid + minUnitCount * minUnitWid + unitSpacing * unitTotal;
+        totalUnitLength = unitTotal * unitSpacing + maxUnitWid;
+        //rightSideX - leftsideX == totalUnitLength;这样才能选中所有的刻度
         leftSideX = -getMeasuredWidth()/2;
-        rightSideX = totalUnitLength + getMeasuredWidth()/2;
+        rightSideX = totalUnitLength - getMeasuredWidth()/2;
     }
 
     @Override
@@ -229,22 +225,12 @@ public class BooHeeRulerView extends View {
         if(callBack != null) callBack.onDataChanged(currentValue);//回调数值用于显示
     }
 
-    private float getScaleXUnitValue(int x) {
+    private float getScaleXUnitValue(int scrollX) {
         float value = startNum;
-        int maxUnitLength = (int)(maxUnitWid + (unitNums-1)*minUnitWid + unitNums*unitSpacing);
-        int count = (x-getMeasuredWidth()/2-(int)maxUnitWid)/ maxUnitLength;
-        value = value + count * unitNums * unitValue;
-        if(x % maxUnitLength != 0){
-            int miniUnitArea = (x - count * maxUnitLength);
-            int miniCount = miniUnitArea / (int) (minUnitWid + unitSpacing);
-            value = value + miniCount * unitValue;
-            if( miniUnitArea % (int) (minUnitWid + unitSpacing) != 0){
-                int overPlus = miniUnitArea - miniCount*(int) (minUnitWid + unitSpacing);
-                if(overPlus > (minUnitWid + unitSpacing)/2) value = value + unitValue;
-            }
-
-        }
-        Log.i(TAG,"------->"+value+"kg");
+        int count = Math.round((scrollX - leftSideX)/totalUnitLength * unitTotal);
+        value +=  count * unitValue;
+        Log.i(TAG,"scrollX---------------->" + scrollX);
+        Log.i(TAG,"scale---------------->" + value + "kg");
        return value;
     }
 
