@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.OverScroller;
 
 /**
  * Created by yannis on 2017/10/30.
@@ -69,6 +70,10 @@ public class BooHeeRulerView extends View {
     private float rightSideX;
     //当前刻度值
     private float currentValue;
+    //当前刻度精确值
+    private float currValueExact;
+    //控制滑动
+    private OverScroller overScroller;
 
     private RulerDataCallBack callBack;
 
@@ -107,7 +112,7 @@ public class BooHeeRulerView extends View {
         vTracker = VelocityTracker.obtain();
         maxVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
         minVelocity = ViewConfiguration.get(context).getScaledMinimumFlingVelocity();
-
+        overScroller = new OverScroller(context);
     }
 
     private void initPaint() {
@@ -175,9 +180,13 @@ public class BooHeeRulerView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         int action  = event.getAction();
         float startX = event.getX();
+        vTracker.addMovement(event);
         //Log.i(TAG,event.toString()+"----"+event.getX());
         switch (action){
             case MotionEvent.ACTION_DOWN:
+                if(!overScroller.isFinished()){
+                    overScroller.abortAnimation();
+                }
                 if(vTracker != null) vTracker.clear();
                 vTracker.addMovement(event);
                 lastestX = startX;
@@ -191,8 +200,9 @@ public class BooHeeRulerView extends View {
                 vTracker.addMovement(event);
                 vTracker.computeCurrentVelocity(1000,maxVelocity);
                 float xVelocity = vTracker.getXVelocity();
-                if(Math.abs(xVelocity) > minVelocity)reverseFling(-xVelocity);//尺子反向滑动
+                if(Math.abs(xVelocity) > minVelocity)reverseFling(-(int)xVelocity);//尺子反向滑动
                 else scrollToLastestUnit();//滑动到最近刻度
+                vTracker.clear();
                 break;
             case MotionEvent.ACTION_CANCEL:
                 break;
@@ -200,10 +210,18 @@ public class BooHeeRulerView extends View {
         return true;
     }
 
+    /**
+     * 把光标移动到最近的刻度
+     */
     private void scrollToLastestUnit() {
+        float scrollX = scaleToUnitCount(currentValue);
+        overScroller.startScroll(getScrollX(),0,(int)(scrollX - getScrollX()),0,10000);
+        invalidate();//重新绘制
     }
 
-    private void reverseFling(float v) {
+    private void reverseFling(int v) {
+        overScroller.fling(getScrollX(),0,v,0,(int)leftSideX,(int)rightSideX,0,0);
+        invalidate();
     }
 
     @Override
@@ -229,13 +247,31 @@ public class BooHeeRulerView extends View {
         float value = startNum;
         int count = Math.round((scrollX - leftSideX)/totalUnitLength * unitTotal);
         value +=  count * unitValue;
+        currValueExact = (scrollX - leftSideX)/ totalUnitLength * unitTotal * unitValue + startNum;
         Log.i(TAG,"scrollX---------------->" + scrollX);
         Log.i(TAG,"scale---------------->" + value + "kg");
        return value;
     }
 
+    private float scaleToUnitCount(float scale){
+        return (scale - startNum) / unitTotal * totalUnitLength + leftSideX;
+    }
+
     public void setOnDataChangedListener(RulerDataCallBack callBack){
         this.callBack = callBack;
+    }
+
+    @Override
+    public void computeScroll() {
+        //super.computeScroll();
+        if(overScroller.computeScrollOffset()){
+            scrollTo(overScroller.getCurrX(),overScroller.getCurrY());
+        }
+       /* //最后一次滑动进行精确定位，滑动到最近的刻度
+        if(!overScroller.computeScrollOffset() && currentValue != currValueExact ){
+            scrollToLastestUnit();
+        }*/
+        invalidate();
     }
 
     /*  scrollTo(int x,int y)和scrollBy(int x,int y)方法的坐标说明
