@@ -63,14 +63,14 @@ public class BooHeeRulerView extends View {
     //滑动结束落点
     private float lastestX;
     //所有刻度的总长
-    private float totalUnitLength;
+    private int totalUnitLength;
     //X轴左边界
-    private float leftSideX;
+    private int leftSideX;
     //X轴的右边界
-    private float rightSideX;
+    private int  rightSideX;
     //当前刻度值
     private float currentValue;
-    //当前刻度精确值
+    //滑动的精确值，用于和当前实际值比较，是否回滚到最近刻度
     private float currValueExact;
     //控制滑动
     private OverScroller overScroller;
@@ -197,14 +197,16 @@ public class BooHeeRulerView extends View {
                 lastestX = startX;
                 break;
             case MotionEvent.ACTION_UP:
-                vTracker.addMovement(event);
+                //vTracker.addMovement(event);
                 vTracker.computeCurrentVelocity(1000,maxVelocity);
                 float xVelocity = vTracker.getXVelocity();
                 if(Math.abs(xVelocity) > minVelocity)reverseFling(-(int)xVelocity);//尺子反向滑动
                 else scrollToLastestUnit();//滑动到最近刻度
                 vTracker.clear();
+                lastestX = 0;
                 break;
             case MotionEvent.ACTION_CANCEL:
+                if(!overScroller.isFinished()) overScroller.abortAnimation();
                 break;
         }
         return true;
@@ -215,12 +217,13 @@ public class BooHeeRulerView extends View {
      */
     private void scrollToLastestUnit() {
         float scrollX = scaleToUnitCount(currentValue);
-        overScroller.startScroll(getScrollX(),0,(int)(scrollX - getScrollX()),0,10000);
+        Log.i(TAG,"scrollToLastestUnit---------------------->" + currentValue + ":" +scrollX + ":"+getScrollX());
+        overScroller.startScroll(getScrollX(),0,(int)(scrollX) - getScrollX(),0,1000);
         invalidate();//重新绘制
     }
 
     private void reverseFling(int v) {
-        overScroller.fling(getScrollX(),0,v,0,(int)leftSideX,(int)rightSideX,0,0);
+        overScroller.fling(getScrollX(),0,v,0,leftSideX,rightSideX,0,0);
         invalidate();
     }
 
@@ -228,7 +231,7 @@ public class BooHeeRulerView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         //计算尺子的边界
-        totalUnitLength = unitTotal * unitSpacing + maxUnitWid;
+        totalUnitLength = (int)(unitTotal * unitSpacing + maxUnitWid);
         //rightSideX - leftsideX == totalUnitLength;这样才能选中所有的刻度
         leftSideX = -getMeasuredWidth()/2;
         rightSideX = totalUnitLength - getMeasuredWidth()/2;
@@ -236,8 +239,8 @@ public class BooHeeRulerView extends View {
 
     @Override
     public void scrollTo(@Px int x, @Px int y) {
-        if(x < leftSideX) x = ((int) leftSideX);
-        if(x > rightSideX) x = ((int) rightSideX);
+        if(x < leftSideX) x =  leftSideX;
+        if(x > rightSideX) x = rightSideX;
         if(x != getScrollX()) super.scrollTo(x, y);
         currentValue = getScaleXUnitValue(x);
         if(callBack != null) callBack.onDataChanged(currentValue);//回调数值用于显示
@@ -245,16 +248,22 @@ public class BooHeeRulerView extends View {
 
     private float getScaleXUnitValue(int scrollX) {
         float value = startNum;
-        int count = Math.round((scrollX - leftSideX)/totalUnitLength * unitTotal);
-        value +=  count * unitValue;
-        currValueExact = (scrollX - leftSideX)/ totalUnitLength * unitTotal * unitValue + startNum;
+        float count = (scrollX - leftSideX)/(float)(totalUnitLength) * unitTotal;
+        value +=  Math.round(count) * unitValue;
+        currValueExact = (scrollX - leftSideX)/ (float)totalUnitLength * unitTotal * unitValue + startNum;
+        Log.i(TAG,"===================================");
+        Log.i(TAG,"leftSideX----------------------->" + leftSideX);
+        Log.i(TAG,"totalUnitLength----------------------->" + totalUnitLength);
+        Log.i(TAG,"unitTotal----------------------->" + unitTotal);
+        Log.i(TAG,"count----------------------->" + count);
         Log.i(TAG,"scrollX---------------->" + scrollX);
         Log.i(TAG,"scale---------------->" + value + "kg");
+        Log.i(TAG,"===================================");
        return value;
     }
 
     private float scaleToUnitCount(float scale){
-        return (scale - startNum) / unitTotal * totalUnitLength + leftSideX;
+        return (scale - startNum) /(unitValue * unitTotal) * totalUnitLength + leftSideX;
     }
 
     public void setOnDataChangedListener(RulerDataCallBack callBack){
@@ -264,35 +273,13 @@ public class BooHeeRulerView extends View {
     @Override
     public void computeScroll() {
         //super.computeScroll();
-        if(overScroller.computeScrollOffset()){
-            scrollTo(overScroller.getCurrX(),overScroller.getCurrY());
+        if(overScroller.computeScrollOffset()) {
+            scrollTo(overScroller.getCurrX(), overScroller.getCurrY());
+            //在动画结束后，光标滑动到最近刻度
+            if (!overScroller.computeScrollOffset() && currentValue != Math.round(currValueExact)) {
+                scrollToLastestUnit();
+            }
+            invalidate();
         }
-       /* //最后一次滑动进行精确定位，滑动到最近的刻度
-        if(!overScroller.computeScrollOffset() && currentValue != currValueExact ){
-            scrollToLastestUnit();
-        }*/
-        invalidate();
     }
-
-    /*  scrollTo(int x,int y)和scrollBy(int x,int y)方法的坐标说明
- *   比如我们对于一个TextView调用scrollTo(0,25)
- *   那么该TextView中的content(比如显示的文字:Hello)会怎么移动呢?
-            *   向下移动25个单位?不,恰好相反.
- *   这是为什么呢?
-            *   因为调用这两个方法会导致视图重绘.
- *   即调用public void invalidate(int l, int t, int r, int b)方法.
-            *   此处的l,t,r,b四个参数就表示View原来的坐标.
- *   在该方法中最终会调用:
-            *   tmpr.set(l - scrollX, t - scrollY, r - scrollX, b - scrollY);
- *   p.invalidateChild(this, tmpr);
- *   其中tmpr是ViewParent,tmpr是Rect,this是原来的View.
- *   通过这两行代码就把View在一个Rect中重绘.
- *   请注意第一行代码:
-            *   原来的l和r均减去了scrollX
- *   原来的t和b均减去了scrollY
- *   就是说scrollX如果是正值,那么重绘后的View的宽度反而减少了;反之同理
- *   就是说scrollY如果是正值,那么重绘后的View的高度反而减少了;反之同理
- *   所以,TextView调用scrollTo(0,25)和我们的理解相反
- *
-         *   scrollBy(int x,int y)方法与上类似,不再赘述.*/
 }
