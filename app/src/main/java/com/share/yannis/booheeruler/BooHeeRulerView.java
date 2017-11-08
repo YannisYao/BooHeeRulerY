@@ -75,8 +75,6 @@ public class BooHeeRulerView extends View {
     private int  rightSideX;
     //当前刻度值
     private float currentValue;
-    //滑动的精确值，用于和当前实际值比较，是否回滚到最近刻度
-    private float currValueExact;
     //控制滑动
     private OverScroller overScroller;
 
@@ -265,7 +263,6 @@ public class BooHeeRulerView extends View {
         float value = startNum;
         float count = (scrollX - leftSideX)/(float)(totalUnitLength) * unitTotal;
         value +=  Math.round(count) * unitValue;
-        currValueExact = (scrollX - leftSideX)/ (float)totalUnitLength * unitTotal * unitValue + startNum;
        return value;
     }
 
@@ -283,7 +280,7 @@ public class BooHeeRulerView extends View {
         if(overScroller.computeScrollOffset()) {
             scrollTo(overScroller.getCurrX(), overScroller.getCurrY());
             //在动画结束后，光标滑动到最近刻度
-            if (!overScroller.computeScrollOffset() && currentValue != Math.round(currValueExact)) {
+            if (!overScroller.computeScrollOffset() && (int)(scaleToUnitCount(currentValue)) != getScrollX()) {
                 scrollToLastestUnit();
             }
             invalidate();
