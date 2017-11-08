@@ -31,7 +31,7 @@ public class BooHeeRulerView extends View {
     //大刻度的宽度
     private float maxUnitWid = 7f;
     //刻度相邻间距
-    private float unitSpacing = 30f;
+    private int unitSpacing = 30;
     //一个大刻度的间隔数
     private int unitNums = 10;
     //最小刻度的颜色
@@ -102,7 +102,7 @@ public class BooHeeRulerView extends View {
             startNum = array.getFloat(R.styleable.BooHeeRulerView_startNum,0.0f);
             unitTotal = array.getInteger(R.styleable.BooHeeRulerView_unitTotal,100);
             unitValue = array.getFloat(R.styleable.BooHeeRulerView_unitValue,0.1f);
-            unitSpacing = array.getFloat(R.styleable.BooHeeRulerView_unitSpacing,30f);
+            unitSpacing = array.getInteger(R.styleable.BooHeeRulerView_unitSpacing,30);
             backgroundColor = array.getColor(R.styleable.BooHeeRulerView_backgroundColor,0xFFF5F8F5);
             array.recycle();
         }
@@ -231,7 +231,7 @@ public class BooHeeRulerView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         //计算尺子的边界
-        totalUnitLength = (int)(unitTotal * unitSpacing + maxUnitWid);
+        totalUnitLength =unitTotal * unitSpacing;
         //rightSideX - leftsideX == totalUnitLength;这样才能选中所有的刻度
         leftSideX = -getMeasuredWidth()/2;
         rightSideX = totalUnitLength - getMeasuredWidth()/2;
@@ -263,7 +263,7 @@ public class BooHeeRulerView extends View {
     }
 
     private float scaleToUnitCount(float scale){
-        return (scale - startNum) /(unitValue * unitTotal) * totalUnitLength + leftSideX;
+        return (scale - startNum) /unitValue * unitSpacing  + leftSideX;
     }
 
     public void setOnDataChangedListener(RulerDataCallBack callBack){

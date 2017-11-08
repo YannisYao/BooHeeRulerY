@@ -9,7 +9,7 @@
         <attr name = "startNum" format="float"/>
         <attr name = "unitTotal" format="integer"/>
         <attr name = "unitValue" format="float"/>
-        <attr name = "unitSpacing" format="float"/>
+        <attr name = "unitSpacing" format="integer"/>
         <attr name = "backgroundColor" format="color"/>
     </declare-styleable>
 
