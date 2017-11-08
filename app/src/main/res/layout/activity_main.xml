@@ -6,19 +6,35 @@
     android:layout_height="match_parent"
     tools:context="com.share.yannis.booheeruler.MainActivity">
 
-    <TextView
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
-        android:layout_height="200dp"
-        android:layout_alignParentTop="true"
-        android:textSize="40sp"
-        android:gravity="center"
-        android:layout_centerInParent="true"
-        android:text="80kg"/>
-
-    <com.share.yannis.booheeruler.BooHeeRulerLayout
+    <com.share.yannis.booheeruler.RulerValueDisplayView
+        android:id="@+id/value_view"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:layout_below="@+id/content"
+        android:layout_above="@+id/ruler_latout">
+        <TextView
+            android:id="@+id/value_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="66.6"
+            android:textSize="40sp"
+            android:textColor="#72BA48"
+            android:layout_centerInParent="true"/>
+        <TextView
+            android:id="@+id/unit_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#72BA48"
+            android:textSize="14sp"
+            android:text="kg"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/value_tv"
+            android:layout_alignTop="@+id/value_tv"/>
+    </com.share.yannis.booheeruler.RulerValueDisplayView>
+
+    <com.share.yannis.booheeruler.BooHeeRulerLayout
+        android:id="@+id/ruler_latout"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
         />
 </RelativeLayout>

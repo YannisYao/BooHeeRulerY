@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BooHeeRuler</string>
+    <string name="ruler_unit">kg</string>
 </resources>

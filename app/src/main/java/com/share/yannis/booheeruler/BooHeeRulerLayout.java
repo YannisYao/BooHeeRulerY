@@ -73,4 +73,10 @@ public class BooHeeRulerLayout extends RelativeLayout {
         float startX = getWidth()/2;
         canvas.drawLine(startX,0,startX,midLineHeight,midLinePaint);
     }
+
+    public void setOnRulerValueChangedListener(RulerDataCallBack callback){
+       if(callback != null){
+           rulerView.setOnDataChangedListener(callback);
+       }
+    }
 }
