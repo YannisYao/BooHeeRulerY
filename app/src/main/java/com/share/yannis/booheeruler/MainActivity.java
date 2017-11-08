@@ -13,5 +13,6 @@ public class MainActivity extends AppCompatActivity {
         displayView = (RulerValueDisplayView) findViewById(R.id.value_view);
         rulerLayout = (BooHeeRulerLayout) findViewById(R.id.ruler_latout);
         displayView.setRulerLayout(rulerLayout);
+        rulerLayout.setCurrentValue(80.0f);
     }
 }

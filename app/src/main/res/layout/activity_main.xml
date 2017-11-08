@@ -15,7 +15,6 @@
             android:id="@+id/value_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="66.6"
             android:textSize="40sp"
             android:textColor="#72BA48"
             android:layout_centerInParent="true"/>
@@ -25,7 +24,6 @@
             android:layout_height="wrap_content"
             android:textColor="#72BA48"
             android:textSize="14sp"
-            android:text="kg"
             android:layout_marginLeft="5dp"
             android:layout_toRightOf="@+id/value_tv"
             android:layout_alignTop="@+id/value_tv"/>

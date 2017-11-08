@@ -5,7 +5,6 @@ import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.text.DecimalFormat;
 
 /**
  * Created by yanniszone on 2017/11/8.
@@ -38,9 +37,8 @@ public class RulerValueDisplayView extends RelativeLayout implements RulerDataCa
     }
 
     @Override
-    public void onDataChanged(float value) {
-        DecimalFormat df = new DecimalFormat("##0.0");
-        valueTv.setText(df.format(value));
+    public void onDataChanged(String value) {
+        valueTv.setText(value);
     }
 
     public void setRulerLayout(BooHeeRulerLayout booHeeRulerLayout){

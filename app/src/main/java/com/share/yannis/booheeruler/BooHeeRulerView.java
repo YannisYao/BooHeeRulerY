@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.Px;
 import android.util.AttributeSet;
@@ -12,12 +13,16 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewTreeObserver;
 import android.widget.OverScroller;
+
+import java.text.DecimalFormat;
 
 /**
  * Created by yannis on 2017/10/30.
- * 仿写薄荷健康的惯性尺子
+ * 仿写薄荷健康的惯性滑动尺子
  * 防止滑动滑出边界，需要重写scrollTo方法（滑动过程中是通过scrollBy完成，scrollBy实质是调用了scrollTo）
+ * 低版本api可能需要关闭硬件加速
  */
 
 public class BooHeeRulerView extends View {
@@ -113,7 +118,20 @@ public class BooHeeRulerView extends View {
         maxVelocity = ViewConfiguration.get(context).getScaledMaximumFlingVelocity();
         minVelocity = ViewConfiguration.get(context).getScaledMinimumFlingVelocity();
         overScroller = new OverScroller(context);
+        //初始化默认位置
+        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }else{
+                    getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                }
+                gotoDefaultLocation(currentValue);
+            }
+        });
     }
+
 
     private void initPaint() {
         unitPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -181,7 +199,6 @@ public class BooHeeRulerView extends View {
         int action  = event.getAction();
         float startX = event.getX();
         vTracker.addMovement(event);
-        //Log.i(TAG,event.toString()+"----"+event.getX());
         switch (action){
             case MotionEvent.ACTION_DOWN:
                 if(!overScroller.isFinished()){
@@ -197,7 +214,6 @@ public class BooHeeRulerView extends View {
                 lastestX = startX;
                 break;
             case MotionEvent.ACTION_UP:
-                //vTracker.addMovement(event);
                 vTracker.computeCurrentVelocity(1000,maxVelocity);
                 float xVelocity = vTracker.getXVelocity();
                 if(Math.abs(xVelocity) > minVelocity)reverseFling(-(int)xVelocity);//尺子反向滑动
@@ -217,7 +233,6 @@ public class BooHeeRulerView extends View {
      */
     private void scrollToLastestUnit() {
         float scrollX = scaleToUnitCount(currentValue);
-        Log.i(TAG,"scrollToLastestUnit---------------------->" + currentValue + ":" +scrollX + ":"+getScrollX());
         overScroller.startScroll(getScrollX(),0,(int)(scrollX) - getScrollX(),0,1000);
         invalidate();//重新绘制
     }
@@ -243,7 +258,7 @@ public class BooHeeRulerView extends View {
         if(x > rightSideX) x = rightSideX;
         if(x != getScrollX()) super.scrollTo(x, y);
         currentValue = getScaleXUnitValue(x);
-        if(callBack != null) callBack.onDataChanged(currentValue);//回调数值用于显示
+        if(callBack != null) callBack.onDataChanged(decimalFormat(currentValue));//回调数值用于显示
     }
 
     private float getScaleXUnitValue(int scrollX) {
@@ -251,14 +266,6 @@ public class BooHeeRulerView extends View {
         float count = (scrollX - leftSideX)/(float)(totalUnitLength) * unitTotal;
         value +=  Math.round(count) * unitValue;
         currValueExact = (scrollX - leftSideX)/ (float)totalUnitLength * unitTotal * unitValue + startNum;
-        Log.i(TAG,"===================================");
-        Log.i(TAG,"leftSideX----------------------->" + leftSideX);
-        Log.i(TAG,"totalUnitLength----------------------->" + totalUnitLength);
-        Log.i(TAG,"unitTotal----------------------->" + unitTotal);
-        Log.i(TAG,"count----------------------->" + count);
-        Log.i(TAG,"scrollX---------------->" + scrollX);
-        Log.i(TAG,"scale---------------->" + value + "kg");
-        Log.i(TAG,"===================================");
        return value;
     }
 
@@ -281,5 +288,26 @@ public class BooHeeRulerView extends View {
             }
             invalidate();
         }
+    }
+
+    private void gotoDefaultLocation(float currentValue) {
+        float scrollX = scaleToUnitCount(currentValue);
+        scrollTo((int)scrollX,0);
+        if (callBack != null) {
+            callBack.onDataChanged(decimalFormat(currentValue));
+        }
+    }
+
+    public float getCurrentValue() {
+        return currentValue;
+    }
+
+    public void setCurrentValue(float currentValue) {
+        this.currentValue = Float.parseFloat(decimalFormat(currentValue));
+    }
+
+    public static String  decimalFormat(float value){
+        DecimalFormat df = new DecimalFormat("##0.0");
+        return df.format(value);
     }
 }

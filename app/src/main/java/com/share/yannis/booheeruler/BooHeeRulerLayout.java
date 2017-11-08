@@ -9,6 +9,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import java.text.DecimalFormat;
+
 /**
  * Created by Yannis on 2017/10/30.
  * 尺子UI包裹Layout
@@ -78,5 +80,11 @@ public class BooHeeRulerLayout extends RelativeLayout {
        if(callback != null){
            rulerView.setOnDataChangedListener(callback);
        }
+    }
+
+    public void setCurrentValue(float value){
+        if (rulerView != null) {
+            rulerView.setCurrentValue(value);
+        }
     }
 }

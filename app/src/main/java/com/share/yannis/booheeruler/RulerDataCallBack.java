@@ -6,5 +6,5 @@ package com.share.yannis.booheeruler;
  */
 
 public interface RulerDataCallBack {
-    public void onDataChanged(float value);
+    public void onDataChanged(String value);
 }
