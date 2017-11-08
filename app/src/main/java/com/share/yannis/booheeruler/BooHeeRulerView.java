@@ -279,7 +279,7 @@ public class BooHeeRulerView extends View {
         //super.computeScroll();
         if(overScroller.computeScrollOffset()) {
             scrollTo(overScroller.getCurrX(), overScroller.getCurrY());
-            //在动画结束后，光标滑动到最近刻度
+            //在动画结束后，光标滑动到最近刻度,此处放在if条件里面判断，是避免drag方式导致回滚，和scrollBy操作冲突，界面卡顿的问题
             if (!overScroller.computeScrollOffset() && (int)(scaleToUnitCount(currentValue)) != getScrollX()) {
                 scrollToLastestUnit();
             }
